@@ -15,6 +15,10 @@ package("eui-neo")
     add_configs("app_runner", {description = "Build the EUI application runner (defines main)", default = false, type = "boolean"})
     add_configs("markdown", {description = "Enable MD4C Markdown parsing support", default = true, type = "boolean"})
     add_configs("vulkan_low_latency", {description = "Prefer low-latency Vulkan presentation", default = false, type = "boolean"})
+    -- Bump this when the port recipe changes without an upstream version bump.
+    -- It participates in Xmake's package hash and forces stale binary caches to
+    -- be rebuilt while keeping the public package version unchanged.
+    add_configs("port_revision", {description = "Internal package port revision", default = "4", values = {"4"}, readonly = true})
 
     if is_plat("windows") or is_plat("mingw") then
         add_syslinks("winmm", "urlmon", "shell32", "user32", "imm32", "pdh", "comdlg32", "gdi32")
