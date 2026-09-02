@@ -6,17 +6,20 @@ package("eui-neo")
     add_urls("https://github.com/sudoevolve/EUI-NEO/archive/refs/tags/$(version).tar.gz",
              "https://github.com/sudoevolve/EUI-NEO.git")
 
+    add_versions("v0.5.8", "ca886cfb62bc05a849d2176bd6b30bbf2d0e14e1f866305ce622af6177548c8c")
+    add_versions("v0.5.7", "2d3ec0a36e34b98d13dbdaf67afa4fe178cb4b52841eb17529517cb48be43551")
     add_versions("v0.5.5", "cf0da91d7544fe406b704922137fd4d55ed080b3e647501e0ca5303abb00eb98")
 
     add_configs("window_backend", {description = "Window backend", default = "glfw", values = {"glfw", "sdl2"}})
     add_configs("render_backend", {description = "Render backend", default = "opengl", values = {"auto", "opengl", "vulkan"}})
+    add_configs("app_runner", {description = "Build the EUI application runner (defines main)", default = false, type = "boolean"})
     add_configs("markdown", {description = "Enable MD4C Markdown parsing support", default = true, type = "boolean"})
     add_configs("vulkan_low_latency", {description = "Prefer low-latency Vulkan presentation", default = false, type = "boolean"})
 
     add_deps("freetype", "libpng", "zlib")
 
     if is_plat("windows", "mingw") then
-        add_syslinks("imm32", "urlmon", "comdlg32")
+        add_syslinks("winmm", "urlmon", "shell32", "user32", "imm32", "pdh", "comdlg32")
     end
 
     on_load(function(package)
@@ -35,6 +38,9 @@ package("eui-neo")
         if not package:is_plat("windows", "mingw") then
             package:add("deps", "libcurl")
         end
+        if package:config("app_runner") then package:add("links", "eui_app") end
+        package:add("links", "eui_neo")
+        if package:config("app_runner") then package:add("defines", "EUI_APP_RUNNER=1") end
     end)
 
     on_install("windows", "mingw", "linux", "macosx", function(package)
@@ -42,12 +48,19 @@ package("eui-neo")
         local configs = {}
         configs.window_backend = package:config("window_backend")
         configs.render_backend = package:config("render_backend")
+        configs.app_runner = package:config("app_runner")
         configs.markdown = package:config("markdown")
         configs.vulkan_low_latency = package:config("vulkan_low_latency")
         import("package.tools.xmake").install(package, configs)
     end)
 
     on_test(function (package)
+        -- The app variant intentionally exports a program entry point. The
+        -- package snippet test also supplies main(), so skip that link-only
+        -- check for this configuration.
+        if package:config("app_runner") then
+            return
+        end
         assert(package:check_cxxsnippets({test = [[
             namespace app {
                 const DslAppConfig& dslAppConfig() {

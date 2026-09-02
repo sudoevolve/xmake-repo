@@ -5,6 +5,7 @@ set_languages("c99", "cxx17")
 
 option("window_backend", {default = "glfw", values = {"glfw", "sdl2"}, description = "Window backend: glfw or sdl2"})
 option("render_backend", {default = "opengl", values = {"auto", "opengl", "vulkan"}, description = "Render backend: auto, opengl, or vulkan"})
+option("app_runner", {default = false, description = "Build the EUI application runner (defines main)."})
 option("shared", {default = false, description = "Build eui_neo as a shared library instead of a static library."})
 option("modules", {default = true, description = "Build optional EUI-NEO modules when their directories are present."})
 option("markdown", {default = true, description = "Enable MD4C Markdown parsing support."})
@@ -74,6 +75,7 @@ target("eui_neo")
         "core/platform/performance_stats.cpp",
         "core/platform/platform.cpp",
         "core/render/image.cpp",
+        "core/render/image_stream.cpp",
         "core/render/image_facade.cpp",
         "core/render/image_source.cpp",
         "core/render/primitive.cpp",
@@ -83,7 +85,8 @@ target("eui_neo")
         "core/render/shadertoy_primitive.cpp",
         "core/render/stb_image_impl.cpp",
         "core/render/text.cpp",
-        "core/window/window_backend.cpp"
+        "core/window/window_backend.cpp",
+        "core/window/window_input_backend.cpp"
     )
 
     local c_flags = {}
@@ -207,6 +210,27 @@ target("eui_neo")
         end
     end
 target_end()
+
+if get_config("app_runner") then
+    local app_main_source
+    if window_backend == "sdl2" then
+        app_main_source = "core/app/sdl2_app_main.cpp"
+    else
+        app_main_source = "core/app/glfw_app_main.cpp"
+    end
+
+    target("eui_app")
+        set_kind("static")
+        set_group("framework")
+        add_files(app_main_source)
+        add_includedirs("include", ".")
+        add_deps("eui_neo", {public = true})
+        add_defines("EUI_APP_RUNNER_LIBRARY=1")
+        if is_plat("windows") then
+            add_cxflags("/utf-8")
+        end
+    target_end()
+end
 
 if build_modules then
     if os.exists("modules/keyboard/keyboard.h") then
