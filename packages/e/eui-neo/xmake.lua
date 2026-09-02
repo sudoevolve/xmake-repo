@@ -16,21 +16,13 @@ package("eui-neo")
     add_configs("markdown", {description = "Enable MD4C Markdown parsing support", default = true, type = "boolean"})
     add_configs("vulkan_low_latency", {description = "Prefer low-latency Vulkan presentation", default = false, type = "boolean"})
 
-    add_deps("freetype", "libpng", "zlib")
-
-    if is_plat("windows", "mingw") then
-        add_syslinks("winmm", "urlmon", "shell32", "user32", "imm32", "pdh", "comdlg32")
+    if is_plat("windows") or is_plat("mingw") then
+        add_syslinks("winmm", "urlmon", "shell32", "user32", "imm32", "pdh", "comdlg32", "gdi32")
     end
 
     on_load(function(package)
-        if package:config("window_backend") == "glfw" then
-            package:add("deps", "glfw")
-        end
         if package:config("window_backend") == "sdl2" then
             package:add("deps", "libsdl2")
-        end
-        if package:config("render_backend") == "opengl" then
-            package:add("deps", "glad")
         end
         if package:config("render_backend") == "vulkan" then
             package:add("deps", "vulkansdk", {system = true})
@@ -39,7 +31,26 @@ package("eui-neo")
             package:add("deps", "libcurl")
         end
         if package:config("app_runner") then package:add("links", "eui_app") end
-        package:add("links", "eui_neo")
+        package:add("links", "eui_neo", "eui_freetype", "eui_libpng", "eui_zlib")
+        if package:config("window_backend") == "glfw" then package:add("links", "eui_glfw") end
+        if package:config("render_backend") == "opengl" then package:add("links", "eui_glad") end
+        if package:config("markdown") then package:add("links", "eui_md4c") end
+        if package:config("render_backend") == "opengl" then
+            if package:is_plat("windows") or package:is_plat("mingw") then
+                package:add("syslinks", "opengl32")
+            elseif package:is_plat("linux") then
+                package:add("syslinks", "GL")
+            elseif package:is_plat("macosx") then
+                package:add("frameworks", "OpenGL")
+            end
+        end
+        if package:config("window_backend") == "glfw" then
+            if package:is_plat("linux") then
+                package:add("syslinks", "X11", "Xrandr", "Xinerama", "Xi", "Xcursor", "Xext", "dl", "m")
+            elseif package:is_plat("macosx") then
+                package:add("frameworks", "Cocoa", "IOKit", "CoreFoundation")
+            end
+        end
         if package:config("app_runner") then package:add("defines", "EUI_APP_RUNNER=1") end
     end)
 
