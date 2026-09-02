@@ -27,13 +27,13 @@ package("eui-neo")
             package:add("deps", "glfw")
         end
         if package:config("window_backend") == "sdl2" then
-            package:add("deps", "sdl2")
+            package:add("deps", "libsdl2")
         end
         if package:config("render_backend") == "opengl" then
             package:add("deps", "glad")
         end
         if package:config("render_backend") == "vulkan" then
-            package:add("deps", "vulkan")
+            package:add("deps", "vulkansdk", {system = true})
         end
         if not package:is_plat("windows", "mingw") then
             package:add("deps", "libcurl")
