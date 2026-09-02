@@ -1,5 +1,5 @@
 set_project("EUI-NEO")
-set_version("0.5.5")
+set_version("0.5.8")
 set_xmakever("2.9.0")
 set_languages("c99", "cxx17")
 
