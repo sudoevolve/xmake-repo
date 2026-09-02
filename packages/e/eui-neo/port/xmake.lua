@@ -114,8 +114,7 @@ end
 if render_backend == "opengl" then
     target("eui_glad")
         set_kind("static")
-        add_files("3rd/glad/src/glad.c",
-            {force = {cxflags = {is_plat("windows") and "/TC" or ""}}})
+        add_files("3rd/glad/src/glad.c")
         add_includedirs("3rd/glad/include", {public = true})
     target_end()
 end
@@ -123,8 +122,7 @@ end
 if enable_markdown then
     target("eui_md4c")
         set_kind("static")
-        add_files("3rd/md4c/src/md4c.c",
-            {force = {cxflags = {is_plat("windows") and "/TC" or ""}}})
+        add_files("3rd/md4c/src/md4c.c")
         add_includedirs("3rd/md4c/src", {public = true})
     target_end()
 end
@@ -154,10 +152,9 @@ target("eui_neo")
         "core/window/window_input_backend.cpp"
     )
 
+    -- GCC/MinGW already treats .c files as C.  Do not pass MSVC's /TC
+    -- switch when the target platform is Windows with a MinGW toolchain.
     local c_flags = {}
-    if is_plat("windows") then
-        table.insert(c_flags, "/TC")
-    end
 
     local bridge_flags = table.copy(c_flags)
     if is_plat("macosx") then
@@ -264,7 +261,7 @@ target("eui_neo")
         add_installfiles("3rd/md4c/src/md4c.h", {prefixdir = "include"})
     end
 
-    if is_plat("windows") then
+    if is_toolchain("msvc") then
         add_cxflags("/utf-8")
         if not is_mode("debug") then
             add_cxflags("/O1", "/GS-", "/sdl-", "/wd4819")
@@ -291,7 +288,7 @@ if get_config("app_runner") then
         add_includedirs("include", ".")
         add_deps("eui_neo", {public = true})
         add_defines("EUI_APP_RUNNER_LIBRARY=1")
-        if is_plat("windows") then
+        if is_toolchain("msvc") then
             add_cxflags("/utf-8")
         end
     target_end()
@@ -323,7 +320,7 @@ if build_modules then
             add_files("modules/serial/serial.cpp")
             add_includedirs("modules/serial", {public = true})
             add_deps("eui_neo")
-            if is_plat("windows") then
+            if is_toolchain("msvc") then
                 add_cxflags("/utf-8")
                 if not is_mode("debug") then
                     add_cxflags("/O1", "/GS-", "/sdl-", "/wd4819")
