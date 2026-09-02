@@ -261,15 +261,8 @@ target("eui_neo")
         add_installfiles("3rd/md4c/src/md4c.h", {prefixdir = "include"})
     end
 
-    if is_toolchain("msvc") then
-        add_cxflags("/utf-8")
-        if not is_mode("debug") then
-            add_cxflags("/O1", "/GS-", "/sdl-", "/wd4819")
-        end
-    else
-        if not is_mode("debug") then
-            add_cxxflags("-Os", "-fno-exceptions", "-fno-rtti")
-        end
+    if not is_mode("debug") then
+        add_cxxflags("-Os", "-fno-exceptions", "-fno-rtti")
     end
 target_end()
 
@@ -288,9 +281,6 @@ if get_config("app_runner") then
         add_includedirs("include", ".")
         add_deps("eui_neo", {public = true})
         add_defines("EUI_APP_RUNNER_LIBRARY=1")
-        if is_toolchain("msvc") then
-            add_cxflags("/utf-8")
-        end
     target_end()
 end
 
@@ -320,15 +310,8 @@ if build_modules then
             add_files("modules/serial/serial.cpp")
             add_includedirs("modules/serial", {public = true})
             add_deps("eui_neo")
-            if is_toolchain("msvc") then
-                add_cxflags("/utf-8")
-                if not is_mode("debug") then
-                    add_cxflags("/O1", "/GS-", "/sdl-", "/wd4819")
-                end
-            else
-                if not is_mode("debug") then
-                    add_cxxflags("-Os", "-fno-exceptions", "-fno-rtti")
-                end
+            if not is_mode("debug") then
+                add_cxxflags("-Os", "-fno-exceptions", "-fno-rtti")
             end
         target_end()
     end
