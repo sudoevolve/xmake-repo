@@ -18,7 +18,7 @@ package("eui-neo")
     -- Bump this when the port recipe changes without an upstream version bump.
     -- It participates in Xmake's package hash and forces stale binary caches to
     -- be rebuilt while keeping the public package version unchanged.
-    add_configs("port_revision", {description = "Internal package port revision", default = "4", values = {"4"}, readonly = true})
+    add_configs("port_revision", {description = "Internal package port revision", default = "5", values = {"5"}, readonly = true})
 
     if is_plat("windows") or is_plat("mingw") then
         add_syslinks("winmm", "urlmon", "shell32", "user32", "imm32", "pdh", "comdlg32", "gdi32")
@@ -60,6 +60,15 @@ package("eui-neo")
 
     on_install("windows", "mingw", "linux", "macosx", function(package)
         os.cp(path.join(package:scriptdir(), "port", "xmake.lua"), "xmake.lua")
+        -- Some JetBrains MinGW bundles ship libdep.a in bfd-plugins as an
+        -- archive that GNU ar tries to load as a Windows plugin and rejects
+        -- with STATUS_INVALID_IMAGE_FORMAT.  Keep package builds isolated
+        -- from that host-specific plugin directory.
+        if package:is_plat("windows") then
+            local empty_plugins = path.join(package:builddir(), "empty-bfd-plugins")
+            os.mkdir(empty_plugins)
+            os.setenv("BFD_PLUGIN_PATH", empty_plugins)
+        end
         local configs = {}
         configs.window_backend = package:config("window_backend")
         configs.render_backend = package:config("render_backend")
