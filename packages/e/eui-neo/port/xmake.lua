@@ -87,7 +87,7 @@ target_end()
 if window_backend == "glfw" then
     target("eui_glfw")
         set_kind("static")
-        add_files("3rd/glfw/src/context.c", "3rd/glfw/src/init.c", "3rd/glfw/src/input.c", "3rd/glfw/src/monitor.c", "3rd/glfw/src/platform.c", "3rd/glfw/src/vulkan.c", "3rd/glfw/src/window.c", "3rd/glfw/src/egl_context.c", "3rd/glfw/src/osmesa_context.c", {sourcekind = "cc"})
+        add_files("3rd/glfw/src/context.c", "3rd/glfw/src/init.c", "3rd/glfw/src/input.c", "3rd/glfw/src/monitor.c", "3rd/glfw/src/platform.c", "3rd/glfw/src/vulkan.c", "3rd/glfw/src/window.c", "3rd/glfw/src/egl_context.c", "3rd/glfw/src/osmesa_context.c", "3rd/glfw/src/null_init.c", "3rd/glfw/src/null_monitor.c", "3rd/glfw/src/null_window.c", "3rd/glfw/src/null_joystick.c", {sourcekind = "cc"})
         add_includedirs("3rd/glfw/include", {public = true})
         add_includedirs("3rd/glfw/src")
         if target_is_windows then
