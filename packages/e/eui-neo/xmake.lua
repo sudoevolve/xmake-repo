@@ -14,11 +14,12 @@ package("eui-neo")
     add_configs("render_backend", {description = "Render backend", default = "opengl", values = {"auto", "opengl", "vulkan"}})
     add_configs("app_runner", {description = "Build the EUI application runner (defines main)", default = false, type = "boolean"})
     add_configs("markdown", {description = "Enable MD4C Markdown parsing support", default = true, type = "boolean"})
+    add_configs("tray", {description = "Enable the system tray backend", default = true, type = "boolean"})
     add_configs("vulkan_low_latency", {description = "Prefer low-latency Vulkan presentation", default = false, type = "boolean"})
     -- Bump this when the port recipe changes without an upstream version bump.
     -- It participates in Xmake's package hash and forces stale binary caches to
     -- be rebuilt while keeping the public package version unchanged.
-    add_configs("port_revision", {description = "Internal package port revision", default = "11", values = {"11"}, readonly = true})
+    add_configs("port_revision", {description = "Internal package port revision", default = "12", values = {"12"}, readonly = true})
 
     if is_plat("windows") or is_plat("mingw") then
         add_syslinks("winmm", "urlmon", "shell32", "user32", "imm32", "pdh", "comdlg32", "gdi32")
@@ -73,7 +74,7 @@ package("eui-neo")
         end
         if package:config("window_backend") == "glfw" then
             if package:is_plat("linux") then
-                package:add("syslinks", "X11", "Xrandr", "Xinerama", "Xi", "Xcursor", "Xext", "dl", "m")
+                package:add("syslinks", "X11", "Xrandr", "Xinerama", "Xi", "Xcursor", "Xext", "dl", "m", "rt")
             end
         end
         if package:config("app_runner") then package:add("defines", "EUI_APP_RUNNER=1") end
@@ -95,6 +96,7 @@ package("eui-neo")
         configs.render_backend = package:config("render_backend")
         configs.app_runner = package:config("app_runner")
         configs.markdown = package:config("markdown")
+        configs.tray = package:config("tray")
         configs.vulkan_low_latency = package:config("vulkan_low_latency")
         import("package.tools.xmake").install(package, configs)
     end)

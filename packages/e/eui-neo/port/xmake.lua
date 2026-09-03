@@ -9,6 +9,7 @@ option("app_runner", {default = false, description = "Build the EUI application 
 option("shared", {default = false, description = "Build eui_neo as a shared library instead of a static library."})
 option("modules", {default = true, description = "Build optional EUI-NEO modules when their directories are present."})
 option("markdown", {default = true, description = "Enable MD4C Markdown parsing support."})
+option("tray", {default = true, description = "Enable the system tray backend."})
 option("vulkan_low_latency", {default = false, description = "Prefer low-latency Vulkan presentation when available."})
 
 function eui_discover_macos_vulkan_sdk()
@@ -56,6 +57,7 @@ local window_backend = get_config("window_backend") or "glfw"
 local build_shared  = get_config("shared") and true or false
 local build_modules = get_config("modules") and true or false
 local enable_markdown = get_config("markdown") and true or false
+local enable_tray = get_config("tray") and true or false
 local vk_low_latency  = get_config("vulkan_low_latency") and true or false
 local configured_platform = get_config("plat")
 local target_is_windows = is_plat("windows") or is_plat("mingw")
@@ -147,7 +149,7 @@ if window_backend == "glfw" then
         elseif target_is_linux then
             add_files("3rd/glfw/src/posix_module.c", "3rd/glfw/src/posix_time.c", "3rd/glfw/src/posix_thread.c", "3rd/glfw/src/posix_poll.c", "3rd/glfw/src/linux_joystick.c", "3rd/glfw/src/x11_init.c", "3rd/glfw/src/x11_monitor.c", "3rd/glfw/src/x11_window.c", "3rd/glfw/src/xkb_unicode.c", "3rd/glfw/src/glx_context.c", {sourcekind = "cc"})
             add_defines("_GLFW_X11", "_DEFAULT_SOURCE")
-            add_syslinks("X11", "Xrandr", "Xinerama", "Xi", "Xcursor", "Xext", "dl", "m", {public = true})
+            add_syslinks("X11", "Xrandr", "Xinerama", "Xi", "Xcursor", "Xext", "dl", "m", "rt", {public = true})
         end
     target_end()
 end
@@ -155,7 +157,7 @@ end
 if render_backend == "opengl" then
     target("eui_glad")
         set_kind("static")
-        add_files("3rd/glad/src/glad.c")
+        add_files("3rd/glad/src/glad.c", {sourcekind = "cc"})
         add_includedirs("3rd/glad/include", {public = true})
     target_end()
 end
@@ -163,7 +165,7 @@ end
 if enable_markdown then
     target("eui_md4c")
         set_kind("static")
-        add_files("3rd/md4c/src/md4c.c")
+        add_files("3rd/md4c/src/md4c.c", {sourcekind = "cc"})
         add_includedirs("3rd/md4c/src", {public = true})
     target_end()
 end
@@ -257,6 +259,33 @@ target("eui_neo")
         add_frameworks("Cocoa", {public = true})
         add_syslinks("objc", {public = true})
     end
+
+    on_load(function (target)
+        if not is_plat("linux") or not enable_tray then
+            return
+        end
+        import("package.manager.find_package")
+        local function apply(result, define)
+            target:add("defines", define, {public = true})
+            if result.includedirs then target:add("includedirs", result.includedirs, {public = true}) end
+            if result.linkdirs then target:add("linkdirs", result.linkdirs, {public = true}) end
+            if result.links then target:add("links", result.links, {public = true}) end
+        end
+        local gio = find_package("pkgconfig::gio-2.0")
+        if gio then
+            apply(gio, "EUI_TRAY_SNI=1")
+            return
+        end
+        local appindicator = find_package("pkgconfig::appindicator3-0.1")
+        if appindicator then
+            apply(appindicator, "EUI_TRAY_APPINDICATOR=1")
+            return
+        end
+        os.raise("Linux tray support requires glib/gio (gio-2.0, preferred, SNI backend) " ..
+                 "or GTK3 + libappindicator (legacy fallback), detected via pkg-config, " ..
+                 "but none of them were found. Install your distribution's glib2 development " ..
+                 "package, or configure with --tray=n to build without tray support.")
+    end)
 
     if enable_markdown then
         add_defines("EUI_HAS_MD4C=1", {public = true})
