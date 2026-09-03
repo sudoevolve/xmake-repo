@@ -18,13 +18,18 @@ package("eui-neo")
     -- Bump this when the port recipe changes without an upstream version bump.
     -- It participates in Xmake's package hash and forces stale binary caches to
     -- be rebuilt while keeping the public package version unchanged.
-    add_configs("port_revision", {description = "Internal package port revision", default = "6", values = {"6"}, readonly = true})
+    add_configs("port_revision", {description = "Internal package port revision", default = "7", values = {"7"}, readonly = true})
 
     if is_plat("windows") or is_plat("mingw") then
         add_syslinks("winmm", "urlmon", "shell32", "user32", "imm32", "pdh", "comdlg32", "gdi32")
     end
-
     on_load(function(package)
+        if package:is_plat("macosx") then
+            -- EUI native bridge and tray code use AppKit/Objective-C for
+            -- both GLFW and SDL2 window backends.
+            package:add("frameworks", "Cocoa", "IOKit", "CoreFoundation")
+            package:add("syslinks", "objc")
+        end
         if package:config("window_backend") == "sdl2" then
             package:add("deps", "libsdl2")
         end
@@ -51,8 +56,6 @@ package("eui-neo")
         if package:config("window_backend") == "glfw" then
             if package:is_plat("linux") then
                 package:add("syslinks", "X11", "Xrandr", "Xinerama", "Xi", "Xcursor", "Xext", "dl", "m")
-            elseif package:is_plat("macosx") then
-                package:add("frameworks", "Cocoa", "IOKit", "CoreFoundation")
             end
         end
         if package:config("app_runner") then package:add("defines", "EUI_APP_RUNNER=1") end

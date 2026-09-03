@@ -60,6 +60,14 @@ target("eui_libpng")
     add_files("3rd/libpng-1.6.43/png.c", "3rd/libpng-1.6.43/pngerror.c", "3rd/libpng-1.6.43/pngget.c", "3rd/libpng-1.6.43/pngmem.c", "3rd/libpng-1.6.43/pngpread.c", "3rd/libpng-1.6.43/pngread.c", "3rd/libpng-1.6.43/pngrio.c", "3rd/libpng-1.6.43/pngrtran.c", "3rd/libpng-1.6.43/pngrutil.c", "3rd/libpng-1.6.43/pngset.c", "3rd/libpng-1.6.43/pngtrans.c", "3rd/libpng-1.6.43/pngwio.c", "3rd/libpng-1.6.43/pngwrite.c", "3rd/libpng-1.6.43/pngwtran.c", "3rd/libpng-1.6.43/pngwutil.c", {sourcekind = "cc"})
     add_includedirs("3rd/libpng-1.6.43", "3rd/libpng-1.6.43/scripts", {public = true})
     add_deps("eui_zlib", {public = true})
+    if is_arch("arm64", "aarch64") then
+        add_files(
+            "3rd/libpng-1.6.43/arm/arm_init.c",
+            "3rd/libpng-1.6.43/arm/filter_neon_intrinsics.c",
+            "3rd/libpng-1.6.43/arm/palette_neon_intrinsics.c",
+            {sourcekind = "cc"}
+        )
+    end
     on_load(function(target)
         local generated_header = path.join(target:autogendir(), "pnglibconf.h")
         os.mkdir(path.directory(generated_header))
@@ -101,7 +109,7 @@ if window_backend == "glfw" then
             end
         elseif target_is_macos then
             add_files("3rd/glfw/src/posix_module.c", "3rd/glfw/src/posix_time.c", "3rd/glfw/src/posix_thread.c", {sourcekind = "cc"})
-            add_files("3rd/glfw/src/cocoa_init.m", "3rd/glfw/src/cocoa_joystick.m", "3rd/glfw/src/cocoa_monitor.m", "3rd/glfw/src/cocoa_window.m", "3rd/glfw/src/nsgl_context.m", {sourcekind = "objc"})
+            add_files("3rd/glfw/src/cocoa_init.m", "3rd/glfw/src/cocoa_joystick.m", "3rd/glfw/src/cocoa_monitor.m", "3rd/glfw/src/cocoa_window.m", "3rd/glfw/src/nsgl_context.m", {sourcekind = "mm"})
             add_defines("_GLFW_COCOA")
             add_frameworks("Cocoa", "IOKit", "CoreFoundation", {public = true})
         elseif target_is_linux then
