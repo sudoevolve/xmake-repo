@@ -203,9 +203,9 @@ target("eui_neo")
         table.insert(bridge_flags, "objective-c")
     end
 
-    add_files("3rd/yyjson-0.12.0/src/yyjson.c", {force = {cxflags = c_flags}})
+    add_files("3rd/yyjson-0.12.0/src/yyjson.c", {sourcekind = "cc", force = {cxflags = c_flags}})
     add_files("core/platform/native_bridge.c", "core/platform/tray_bridge.c",
-        {force = {cxflags = bridge_flags}})
+        {sourcekind = "cc", force = {cxflags = bridge_flags}})
 
     if render_backend == "opengl" then
         add_files(
@@ -229,7 +229,7 @@ target("eui_neo")
 
     if window_backend == "glfw" then
         add_files("core/platform/ime_bridge.c",
-            {force = {cxflags = bridge_flags}})
+            {sourcekind = "cc", force = {cxflags = bridge_flags}})
     end
 
     add_includedirs("include", ".", "3rd/tray", {public = true})
