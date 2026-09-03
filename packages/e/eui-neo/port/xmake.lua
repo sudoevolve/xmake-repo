@@ -111,6 +111,7 @@ if window_backend == "glfw" then
             add_files("3rd/glfw/src/posix_module.c", "3rd/glfw/src/posix_time.c", "3rd/glfw/src/posix_thread.c", {sourcekind = "cc"})
             add_files("3rd/glfw/src/cocoa_init.m", "3rd/glfw/src/cocoa_joystick.m", "3rd/glfw/src/cocoa_monitor.m", "3rd/glfw/src/cocoa_window.m", "3rd/glfw/src/nsgl_context.m", {sourcekind = "mm"})
             add_defines("_GLFW_COCOA")
+            add_mflags("-fno-objc-arc")
             add_frameworks("Cocoa", "IOKit", "CoreFoundation", {public = true})
         elseif target_is_linux then
             add_files("3rd/glfw/src/posix_module.c", "3rd/glfw/src/posix_time.c", "3rd/glfw/src/posix_thread.c", "3rd/glfw/src/posix_poll.c", "3rd/glfw/src/linux_joystick.c", "3rd/glfw/src/x11_init.c", "3rd/glfw/src/x11_monitor.c", "3rd/glfw/src/x11_window.c", "3rd/glfw/src/xkb_unicode.c", "3rd/glfw/src/glx_context.c", {sourcekind = "cc"})
