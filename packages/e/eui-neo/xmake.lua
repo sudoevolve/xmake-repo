@@ -18,12 +18,30 @@ package("eui-neo")
     -- Bump this when the port recipe changes without an upstream version bump.
     -- It participates in Xmake's package hash and forces stale binary caches to
     -- be rebuilt while keeping the public package version unchanged.
-    add_configs("port_revision", {description = "Internal package port revision", default = "9", values = {"9"}, readonly = true})
+    add_configs("port_revision", {description = "Internal package port revision", default = "10", values = {"10"}, readonly = true})
 
     if is_plat("windows") or is_plat("mingw") then
         add_syslinks("winmm", "urlmon", "shell32", "user32", "imm32", "pdh", "comdlg32", "gdi32")
     end
     on_load(function(package)
+        if package:is_plat("macosx") and
+            (os.getenv("VULKAN_SDK") or "") == "" and
+            (os.getenv("VK_SDK_PATH") or "") == "" then
+            import("lib.detect.find_tool")
+            local brew = find_tool("brew")
+            if brew then
+                local prefix = try {function()
+                    return os.iorunv(brew.program, {"--prefix"}):trim()
+                end}
+                if prefix and prefix ~= "" and
+                    os.isfile(path.join(prefix, "include", "vulkan", "vulkan.h")) and
+                    os.isfile(path.join(prefix, "lib", "libvulkan.dylib")) then
+                    os.setenv("VULKAN_SDK", prefix)
+                    os.setenv("VK_SDK_PATH", prefix)
+                    print("Vulkan SDK: using Homebrew prefix %s", prefix)
+                end
+            end
+        end
         if package:is_plat("macosx") then
             -- EUI native bridge and tray code use AppKit/Objective-C for
             -- both GLFW and SDL2 window backends.
