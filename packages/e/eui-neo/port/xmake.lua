@@ -9,7 +9,7 @@ option("app_runner", {default = false, description = "Build the EUI application 
 option("shared", {default = false, description = "Build eui_neo as a shared library instead of a static library."})
 option("modules", {default = true, description = "Build optional EUI-NEO modules when their directories are present."})
 option("markdown", {default = true, description = "Enable MD4C Markdown parsing support."})
-option("tray", {default = true, description = "Enable the system tray backend."})
+option("tray", {default = false, description = "Enable the system tray backend."})
 option("vulkan_low_latency", {default = false, description = "Prefer low-latency Vulkan presentation when available."})
 
 function eui_discover_macos_vulkan_sdk()
