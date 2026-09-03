@@ -18,7 +18,7 @@ package("eui-neo")
     -- Bump this when the port recipe changes without an upstream version bump.
     -- It participates in Xmake's package hash and forces stale binary caches to
     -- be rebuilt while keeping the public package version unchanged.
-    add_configs("port_revision", {description = "Internal package port revision", default = "8", values = {"8"}, readonly = true})
+    add_configs("port_revision", {description = "Internal package port revision", default = "9", values = {"9"}, readonly = true})
 
     if is_plat("windows") or is_plat("mingw") then
         add_syslinks("winmm", "urlmon", "shell32", "user32", "imm32", "pdh", "comdlg32", "gdi32")
